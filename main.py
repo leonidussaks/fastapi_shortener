@@ -41,22 +41,29 @@ async def root():
 
 @app.get("/link/{link}")
 async def linker(link: str):
-    new_link = f'{domain_name}/{random_string()}'
+    #{domain_name}/
+    new_link = random_string()
     old_link = f'https://{link}'
     linker = Links(new_link=new_link, old_link=old_link)
     db.add(linker)
     db.commit()
     return {"short_link": new_link, "main_link": old_link, "status": "success"}
 
-
 # create database for linkds
-
 
 @app.get('/test')
 async def test():
     responce = Redir(url='https://vk.com')
     return responce
-
+# todo: fix this shit
+@app.get('/{url}')
+async def redir(url: str):
+    x = db.query(Links.new_link).all()
+    for fuck in x:
+        if url == fuck[0]:
+            print("я ебланище")
+            print(db.query(Links.new_link).get(Links.old_link))
+        print(fuck[0])
 
 def random_string():
     letters = string.ascii_lowercase
