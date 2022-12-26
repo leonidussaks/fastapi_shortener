@@ -1,0 +1,31 @@
+body {
+    margin: auto;
+    font-family: "Fira Code", sans-serif;
+    align-content: center;
+    display: grid;
+    place-items: center;
+    background: url(/static/img/background.svg) no-repeat center center fixed;
+        -webkit-background-size: cover;
+        -moz-background-size: cover;
+        -o-background-size: cover;
+        background-size: cover;
+}
+.box {
+    place-items: center;
+    display: grid;
+    background-color: aliceblue;
+    margin: 20px;
+    padding: 30px;
+    border-radius: 30px;
+    box-shadow: black 0.1em 0.1em 0.3em
+
+}
+
+input {
+    padding: 5px;
+}
+
+label {
+    padding: 20px;
+}
+

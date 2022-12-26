@@ -1,14 +1,16 @@
+import string
 from random import choice
 
-from fastapi import FastAPI
-from fastapi.responses import RedirectResponse as Redir, HTMLResponse as Html
-
-import string
-
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import create_engine
+from fastapi import FastAPI, Request, Form
+from fastapi.responses import RedirectResponse as Redir
+from fastapi.staticfiles import StaticFiles
+from fastapi.templating import Jinja2Templates
 from sqlalchemy import Column, Integer, String
+from sqlalchemy import create_engine, select
+from sqlalchemy.exc import NoResultFound
+from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
+from starlette.responses import HTMLResponse
 
 SQLALCHEMY_DATABASE_URL = "sqlite:///./links.db"
 engine = create_engine(
@@ -17,8 +19,10 @@ engine = create_engine(
 
 Base = declarative_base()
 ###
-domain_name = "http://127.0.0.1:8000"
+domain_name = "http://127.0.0.1:8000/"
 app = FastAPI()
+app.mount("/static", StaticFiles(directory="static"), name="static")
+templates = Jinja2Templates(directory="templates")
 SQLALCHEMY_DATABASE_URL = "sqlite:///links.db"
 
 
@@ -34,36 +38,35 @@ SessionLocal = sessionmaker(autoflush=False, bind=engine)
 db = SessionLocal()
 
 
-@app.get("/")
-async def root():
-    Html('index.html')
+@app.get("/", response_class=HTMLResponse)
+async def root(request: Request):
+    return templates.TemplateResponse("index.html", context={"request": request})
 
+@app.get("/all")
+async  def all_links():
+    x = db.query(Links).all()
+    return x
 
-@app.get("/link/{link}")
-async def linker(link: str):
-    #{domain_name}/
+#todo: create non-redirect function
+@app.post("/link")
+async def short_link(main_link=Form()):
+    # {domain_name}/
     new_link = random_string()
-    old_link = f'https://{link}'
+    old_link = f'https://{main_link}'
     linker = Links(new_link=new_link, old_link=old_link)
     db.add(linker)
     db.commit()
-    return {"short_link": new_link, "main_link": old_link, "status": "success"}
+    return {"short_link": domain_name+new_link, "main_link": old_link, "status": "success"}
 
-# create database for linkds
 
-@app.get('/test')
-async def test():
-    responce = Redir(url='https://vk.com')
-    return responce
-# todo: fix this shit
 @app.get('/{url}')
 async def redir(url: str):
-    x = db.query(Links.new_link).all()
-    for fuck in x:
-        if url == fuck[0]:
-            print("я ебланище")
-            print(db.query(Links.new_link).get(Links.old_link))
-        print(fuck[0])
+    try:
+        x = db.execute(select(Links).filter_by(new_link=url)).scalar_one()
+        return Redir(x.old_link)
+    except NoResultFound:
+        return {"status": "not found link!"}
+
 
 def random_string():
     letters = string.ascii_lowercase
