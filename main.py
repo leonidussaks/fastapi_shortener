@@ -58,7 +58,7 @@ async def short_link(request: Request, main_link=Form()):
     db.add(linker)
     db.commit()
     # return {"short_link": domain_name+new_link, "main_link": old_link, "status": "success"}
-    return templates.TemplateResponse("index.html", context={"request": request, "new_link": domain_name + new_link})
+    return templates.TemplateResponse("index.html", context={"request": request, "new_link": request.url.url + new_link})
 
 
 @app.get('/{url}')
