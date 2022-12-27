@@ -19,7 +19,7 @@ engine = create_engine(
 
 Base = declarative_base()
 ###
-domain_name = "http://127.0.0.1:8000/"
+domain_name = "https://b794-2-57-83-73.eu.ngrok.io/"
 app = FastAPI()
 app.mount("/static", StaticFiles(directory="static"), name="static")
 templates = Jinja2Templates(directory="templates")
@@ -42,21 +42,23 @@ db = SessionLocal()
 async def root(request: Request):
     return templates.TemplateResponse("index.html", context={"request": request})
 
+
 @app.get("/all")
-async  def all_links():
+async def all_links():
     x = db.query(Links).all()
     return x
 
-#todo: create non-redirect function
+
 @app.post("/link")
-async def short_link(main_link=Form()):
+async def short_link(request: Request, main_link=Form()):
     # {domain_name}/
     new_link = random_string()
-    old_link = f'https://{main_link}'
+    old_link = main_link
     linker = Links(new_link=new_link, old_link=old_link)
     db.add(linker)
     db.commit()
-    return {"short_link": domain_name+new_link, "main_link": old_link, "status": "success"}
+    # return {"short_link": domain_name+new_link, "main_link": old_link, "status": "success"}
+    return templates.TemplateResponse("index.html", context={"request": request, "new_link": domain_name + new_link})
 
 
 @app.get('/{url}')

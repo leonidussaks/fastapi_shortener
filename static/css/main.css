@@ -29,3 +29,7 @@ label {
     padding: 20px;
 }
 
+a:link {
+  text-decoration: none;
+    text-decoration-color: brown;
+}
