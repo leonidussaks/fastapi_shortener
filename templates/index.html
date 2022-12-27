@@ -8,7 +8,7 @@
     <div class="box">
 <h1>link shorter for all!</h1>
         {% if new_link %}
-        <p>your link: <a href="{{ new_link }}" target=”_blank”>{{ new_link }}</a></p>
+        <p>your link: <a href="/{{ new_link }}" target=”_blank”>{{ new_link }}</a></p>
         {% endif %}
 <form action="link" method="post">
         <input type="text" size="" name="main_link" placeholder="enter link">

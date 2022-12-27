@@ -53,21 +53,26 @@ async def all_links():
 async def short_link(request: Request, main_link=Form()):
     # {domain_name}/
     new_link = random_string()
-    old_link = main_link
+    old_link = f'https://{main_link}'
     linker = Links(new_link=new_link, old_link=old_link)
     db.add(linker)
     db.commit()
     # return {"short_link": domain_name+new_link, "main_link": old_link, "status": "success"}
-    return templates.TemplateResponse("index.html", context={"request": request, "new_link": request.url.url + new_link})
+    #request.headers.values()[0] +
+    far = new_link
+    print(far)
+    return templates.TemplateResponse("index.html", context={"request": request, "new_link": far})
 
 
 @app.get('/{url}')
-async def redir(url: str):
+async def redir(url: str, request: Request):
+    print("лох")
     try:
         x = db.execute(select(Links).filter_by(new_link=url)).scalar_one()
         return Redir(x.old_link)
     except NoResultFound:
         return {"status": "not found link!"}
+        #return templates.TemplateResponse("index.html", context={"request": request})
 
 
 def random_string():
