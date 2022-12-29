@@ -5,37 +5,17 @@ from fastapi import FastAPI, Request, Form
 from fastapi.responses import RedirectResponse as Redir
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
-from sqlalchemy import Column, Integer, String
-from sqlalchemy import create_engine, select
+from sqlalchemy import select
 from sqlalchemy.exc import NoResultFound
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker
 from starlette.responses import HTMLResponse
 
-SQLALCHEMY_DATABASE_URL = "sqlite:///./links.db"
-engine = create_engine(
-    SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False}
-)
+from models import db, Links
 
-Base = declarative_base()
 ###
 domain_name = "https://b794-2-57-83-73.eu.ngrok.io/"
 app = FastAPI()
 app.mount("/static", StaticFiles(directory="static"), name="static")
 templates = Jinja2Templates(directory="templates")
-SQLALCHEMY_DATABASE_URL = "sqlite:///links.db"
-
-
-class Links(Base):
-    __tablename__ = "links"
-    id = Column(Integer, primary_key=True, index=True)
-    old_link = Column(String)
-    new_link = Column(String)
-
-
-Base.metadata.create_all(engine)
-SessionLocal = sessionmaker(autoflush=False, bind=engine)
-db = SessionLocal()
 
 
 @app.get("/", response_class=HTMLResponse)
@@ -58,21 +38,19 @@ async def short_link(request: Request, main_link=Form()):
     db.add(linker)
     db.commit()
     # return {"short_link": domain_name+new_link, "main_link": old_link, "status": "success"}
-    #request.headers.values()[0] +
-    far = new_link
-    print(far)
-    return templates.TemplateResponse("index.html", context={"request": request, "new_link": far})
+    # request.headers.values()[0] +
+    return templates.TemplateResponse("index.html", context={"request": request, "new_link": new_link})
 
 
 @app.get('/{url}')
-async def redir(url: str, request: Request):
+async def redir(url: str):
     print("лох")
     try:
         x = db.execute(select(Links).filter_by(new_link=url)).scalar_one()
         return Redir(x.old_link)
     except NoResultFound:
         return {"status": "not found link!"}
-        #return templates.TemplateResponse("index.html", context={"request": request})
+        # return templates.TemplateResponse("index.html", context={"request": request})
 
 
 def random_string():
