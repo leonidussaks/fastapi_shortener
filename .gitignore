@@ -1,1 +1,4 @@
 /venv/
+!/.idea/misc.xml
+!/.idea/fastApi_linkshorter.iml
+!/.idea/
