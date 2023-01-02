@@ -1,12 +1,12 @@
 {% extends 'base.html' %}
 
 {% block head %}
-
+<title>Link Shortener by leonidussaks</title>
 {% endblock %}
 
 {% block  body %}
     <div class="box">
-<h1>link shorter for all!</h1>
+<h1>link shortener for everyone!</h1>
         {% if new_link %}
         <p>your link: <a href="/{{ new_link }}" target=”_blank”>{{ new_link }}</a></p>
         {% endif %}

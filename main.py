@@ -1,5 +1,6 @@
-import string
-from random import choice
+import datetime
+import uuid
+from urllib.parse import urlparse
 
 from fastapi import FastAPI, Request, Form
 from fastapi.responses import RedirectResponse as Redir
@@ -11,8 +12,6 @@ from starlette.responses import HTMLResponse
 
 from models import db, Links
 
-###
-domain_name = "https://b794-2-57-83-73.eu.ngrok.io/"
 app = FastAPI()
 app.mount("/static", StaticFiles(directory="static"), name="static")
 templates = Jinja2Templates(directory="templates")
@@ -31,29 +30,29 @@ async def all_links():
 
 @app.post("/link")
 async def short_link(request: Request, main_link=Form()):
-    # {domain_name}/
     new_link = random_string()
-    old_link = f'https://{main_link}'
-    linker = Links(new_link=new_link, old_link=old_link)
+    linker = Links(new_link=new_link, old_link=main_link, date_created=datetime.datetime.now())
     db.add(linker)
     db.commit()
-    # return {"short_link": domain_name+new_link, "main_link": old_link, "status": "success"}
-    # request.headers.values()[0] +
     return templates.TemplateResponse("index.html", context={"request": request, "new_link": new_link})
+
+
+@app.get('/404')
+async def error_404(request: Request):
+    return templates.TemplateResponse("404.html", context={"request": request})
 
 
 @app.get('/{url}')
 async def redir(url: str):
-    print("лох")
     try:
         x = db.execute(select(Links).filter_by(new_link=url)).scalar_one()
-        return Redir(x.old_link)
+        protocol = urlparse(x.old_link)
+        if protocol.scheme == '':
+            return Redir("https://" + x.old_link, status_code=302)
+        return Redir(x.old_link, status_code=302)
     except NoResultFound:
-        return {"status": "not found link!"}
-        # return templates.TemplateResponse("index.html", context={"request": request})
+        return Redir('/404')
 
 
 def random_string():
-    letters = string.ascii_lowercase
-    result_str = ''.join(choice(letters) for _ in range(6))
-    return result_str
+    return uuid.uuid4().hex[:6].lower()

@@ -1,4 +1,4 @@
-from sqlalchemy import create_engine, Column, Integer, String, Boolean, DateTime
+from sqlalchemy import create_engine, Column, Integer, String, DateTime
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 
@@ -13,16 +13,15 @@ class Links(Base):
     __tablename__ = "links"
     id = Column(Integer, primary_key=True, index=True)
     old_link = Column(String)
-    new_link = Column(String)
-    data_created = Column()
+    new_link = Column(String, unique=True)
+    date_created = Column(DateTime)
 
 
-class User(Base):
-    __tablename__ = "User"
+class Admin(Base):
+    __tablename__ = "Admin"
     id = Column(Integer, primary_key=True, index=True)
     username = Column(String)
     password = Column(String)
-    admin = Column(Boolean)
 
 
 Base.metadata.create_all(engine)
