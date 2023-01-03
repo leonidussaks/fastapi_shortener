@@ -19,3 +19,9 @@ shortener link on fastApi
 Запуск
 
 ``python -m uvicorn main:app``
+
+
+<details>
+  <summary>Скриншот</summary>
+  <img src="https://i.imgur.com/pHQ3CHT.png" alt="alt text" title="img" />
+</details>
